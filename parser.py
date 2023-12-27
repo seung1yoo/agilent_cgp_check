@@ -100,7 +100,7 @@ class ExtractGeneInfoFromPanelBed:
             panel_size += self.cal_covered_length(info_dic["covered.position"], 1)
         print(panel_size)
 
-def extract_gene_id(anno):
+def extract_anno_dic(anno):
     anno_dic = dict()
     for _anno in anno.split(";"):
         try:
@@ -110,7 +110,7 @@ def extract_gene_id(anno):
         except ValueError as e:
             print(f"def extract_gene_id : {_anno} {e}")
             continue
-    return anno_dic["gene_id"]
+    return anno_dic
 
 
 
@@ -128,6 +128,8 @@ def main():
     headers.append("end")
     headers.append("strand")
     headers.append("gene_id")
+    headers.append("ens_tid")
+    headers.append("nm_id")
     headers.append("n.probes")
     headers.append("covered_region_by_probes")
     headers.append("exonic_region")
@@ -141,13 +143,15 @@ def main():
         new_items.append(items[3]) #start
         new_items.append(items[4]) #end
         new_items.append(items[6]) #strand
-        new_items.append(extract_gene_id(items[8])) #gene_id
+        new_items.append(extract_anno_dic(items[8])["gene_id"]) #gene_id
+        new_items.append(extract_anno_dic(items[8])["db_xref"]) #ens_tid
+        new_items.append(extract_anno_dic(items[8])["transcript_id"]) #nm_id
         new_items.append(items[9]) #n.probe
         new_items.append(items[10]) #covered_region_by_probe
         new_items.append(items[11]) #exonic_region
         new_items.append(items[12]) #ratio_of_covered
 
-        gene_id = extract_gene_id(items[8])
+        gene_id = extract_anno_dic(items[8])["gene_id"]
         if gene_id in obj.panel_dic:
             new_items.append(obj.panel_dic[gene_id]["n.probes"]) #total.probes_of_this_gene
             new_items.append(obj.cal_covered_length(obj.panel_dic[gene_id]["covered.position"], 1)) #total.covered.region_by_all_probes_of_this_gene
